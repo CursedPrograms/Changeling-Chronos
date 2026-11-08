@@ -7,6 +7,8 @@
   </a>
 </div>
 
+<p align="center"><img src="https://raw.githubusercontent.com/CursedPrograms/Changeling-Studio/main/site/logo.png" alt="Changeling" width="120"></p>
+
 # Changeling Chronos
 
 **Website:** https://cursedprograms.github.io/Changeling-Chronos/
@@ -40,6 +42,9 @@ run.bat photo.jpg --timeline              # five ages side by side
 ```
 
 ### The window
+
+![Changeling Chronos's window: the photo, the result, and the controls on the right](assets/window.png)
+
 
 Changeling's look: **Before** and **After** side by side, the controls on the right.
 
