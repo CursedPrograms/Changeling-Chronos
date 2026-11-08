@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Changeling Chronos: age a face forwards or backwards</title>
+<meta name="description" content="Changeling Chronos: age a face in a photo forwards or backwards, or make a five-age timeline, with StyleGAN2, e4e and pivotal tuning. Part of the Changeling family.">
+<meta name="color-scheme" content="dark">
+<meta property="og:title" content="Changeling Chronos: age a face forwards or backwards">
+<meta property="og:description" content="A face, forwards or backwards in time.">
+<meta property="og:image" content="assets/chronos_samples.jpg">
+<link rel="icon" href="site/icon.svg">
+<link rel="stylesheet" href="site/style.css">
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="eyebrow">Changeling</div>
+    <h1>Chronos</h1>
+    <p class="tagline">A face, forwards or backwards in time</p>
+    <p class="lede">Open a photo and slide towards younger or older, or make a timeline of five ages at once. Chronos
+      learns the face first so every age still looks like the same person, and holds the face's gender while it
+      ages it.</p>
+    <div class="cta">
+      <a class="btn primary" href="https://github.com/CursedPrograms/Changeling-Chronos">View on GitHub</a>
+      <a class="btn" href="#use">Use it</a>
+      <a class="btn" href="#family">The Changeling family</a>
+    </div>
+    <div class="tags">
+      <span class="tag">StyleGAN2</span><span class="tag">e4e</span><span class="tag">Pivotal tuning</span>
+      <span class="tag">FairFace</span><span class="tag">CUDA</span><span class="tag">Python</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="samples">
+    <h2>What it looks like</h2>
+    <p>Three timelines at Balanced quality: much younger, younger, as they are, older, much older. Every face is an
+      AI-generated person who doesn't exist. Click to enlarge.</p>
+    <figure class="sheet"><img id="sheet" src="assets/chronos_samples.jpg" alt="Three faces, each from much younger to much older" width="2000" height="1220" loading="lazy"></figure>
+  </section>
+
+  <section id="use">
+    <h2>Use it</h2>
+    <ol class="steps">
+      <li>Python 3.9 - 3.12; an NVIDIA GPU (4 GB is enough).</li>
+      <li>Start <code>run.bat</code> (or <code>run.ps1</code>, <code>run.sh</code>). The first run sets itself up; next to Changeling Tiresias it borrows its models instead of downloading them again.</li>
+      <li><strong>Open photo</strong>, slide <strong>Age</strong>, press <strong>Age</strong>, then <strong>Save</strong>.</li>
+    </ol>
+    <div class="grid two">
+      <div class="card">
+        <h3>The window</h3>
+        <table>
+          <tr><td>Age</td><td>younger &larr; as you are &rarr; older</td></tr>
+          <tr><td>Timeline</td><td>five ages at once</td></tr>
+          <tr><td>Keep gender</td><td>Auto, Woman, Man, Off</td></tr>
+          <tr><td>Result</td><td>the face frame (default), the whole photo, or the photo with its own hair</td></tr>
+          <tr><td>Quality</td><td>Fast (seconds), Balanced and Best (learn your face first)</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <h3>Without the window</h3>
+        <p><code>run.bat photo.jpg --age 0.6</code> &middot; <code>run.bat photo.jpg --timeline</code></p>
+      </div>
+    </div>
+  </section>
+
+  <section id="family">
+    <h2>The Changeling family</h2>
+    <p>All of them together: <a href="https://github.com/CursedPrograms/Changeling-Studio">Changeling Studio</a>.</p>
+    <div class="grid">
+      <div class="card"><h3><a href="https://github.com/CursedPrograms/Changeling-CopyCat">CopyCat</a></h3><p>One face onto any photo or video.</p></div>
+      <div class="card"><h3><a href="https://github.com/CursedPrograms/Changeling-CopyCat-Realtime">CopyCat Realtime</a></h3><p>The face swap, live on the webcam, with voice.</p></div>
+      <div class="card"><h3><a href="https://github.com/CursedPrograms/Changeling-Tiresias">Tiresias</a></h3><p>Gender swap for photos.</p></div>
+      <div class="card"><h3>Chronos</h3><p>Age a face forwards or backwards.</p></div>
+      <div class="card"><h3><a href="https://github.com/CursedPrograms/Changeling-Cosmetics">Cosmetics</a></h3><p>Makeup, hair colour and length, beards.</p></div>
+    </div>
+  </section>
+</main>
+
+<div id="lightbox" class="lightbox" hidden><img alt=""></div>
+
+<footer id="site-footer">&copy; Cursed Entertainment 2026</footer>
+<script src="site/site.js"></script>
+<script src="https://cursedprograms.github.io/RIFT/site/footer.js"></script>
+</body>
+</html>
