@@ -22,6 +22,20 @@ TAGLINE = "a face, forwards or backwards in time"
 GITHUB = "https://github.com/CursedPrograms/Changeling-Chronos"
 KOFI = "https://ko-fi.com/cursedentertainment"
 PINK = "#e0408a"
+
+BLUE, BLUE_HOVER = "#007ab7", "#005184"     # the Cursed site's blue: the important buttons, and "male"
+
+
+def gender_tint(seg):
+    """Colours a gender selector by what's picked: female pink, male blue, anything else the usual pink."""
+    def tint(value=None):
+        v = (value or seg.get() or "").lower()
+        colour = PINK if ("female" in v or "woman" in v) else BLUE if ("male" in v or v == "man") else PINK
+        seg.configure(selected_color=colour, selected_hover_color=colour)
+    old = seg.cget("command")
+    seg.configure(command=lambda v: (tint(v), old(v) if old else None))
+    tint()
+
 QUALITY_STEPS = {"Fast": 0, "Balanced": 100, "Best": 250}
 TIMELINE = [-1.0, -0.5, 0.0, 0.5, 1.0]
 # what the result is: the aged face frame on its own (default), or pasted back into the photo
@@ -180,7 +194,7 @@ class Window:
                      "(about 1 and 3 minutes). Fast takes seconds.", text_color="gray55",
                      wraplength=280, justify="left").pack(anchor="w", padx=14)
 
-        self.go_btn = ctk.CTkButton(side, text="Age  (Enter)", height=42,
+        self.go_btn = ctk.CTkButton(side, fg_color=BLUE, hover_color=BLUE_HOVER, text="Age  (Enter)", height=42,
                                     font=ctk.CTkFont(size=15, weight="bold"), command=self.go)
         self.go_btn.pack(fill="x", padx=14, pady=(18, 6))
         self.bar = ctk.CTkProgressBar(side, mode="determinate")
