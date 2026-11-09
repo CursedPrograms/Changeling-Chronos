@@ -16,8 +16,8 @@
 ![Three faces, each from much younger through as they are to much older](assets/chronos_samples.jpg)
 
 *Part of the Changeling family, all together in [Changeling Studio](https://github.com/CursedPrograms/Changeling-Studio):
-[CopyCat](https://github.com/CursedPrograms/Changeling-CopyCat) ·
-[CopyCat Realtime](https://github.com/CursedPrograms/Changeling-CopyCat-Realtime) ·
+[Simia](https://github.com/CursedPrograms/Changeling-Simia) ·
+[Simia Realtime](https://github.com/CursedPrograms/Changeling-Simia-Realtime) ·
 [Tiresias](https://github.com/CursedPrograms/Changeling-Tiresias) (gender) ·
 **Chronos** (age) ·
 [Natio](https://github.com/CursedPrograms/Changeling-Natio) (where in the world) ·
