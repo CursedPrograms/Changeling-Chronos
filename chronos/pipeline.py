@@ -78,7 +78,7 @@ class AgeShifter:
     SURE = 0.8                  # Auto trusts FairFace's reading only this sure
     KEEP_GENDER_STEP = 1.2      # how far each nudge back goes (the swap itself uses 5)
     KEEP_GENDER_TRIES = 6
-    AGE_GENDER_HOLD = 2.0       # the push back towards the kept gender, per unit of ageing (see age())
+    AGE_GENDER_HOLD = 3.0       # the push back towards the kept gender, per unit of ageing (see age())
 
     def _p(self, image, gender):
         """FairFace's probability that `image` (an aligned face) is `gender`."""
