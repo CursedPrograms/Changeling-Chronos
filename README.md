@@ -21,13 +21,13 @@
 [Tiresias](https://github.com/CursedPrograms/Changeling-Tiresias) (gender) ·
 **Chronos** (age) ·
 [Natio](https://github.com/CursedPrograms/Changeling-Natio) (where in the world) ·
-[Cosmetics](https://github.com/CursedPrograms/Changeling-Cosmetics) (makeup, hair, beards) ·
+[Cosmeta](https://github.com/CursedPrograms/Changeling-Cosmeta) (makeup, hair, beards) ·
 [Echo](https://github.com/CursedPrograms/Changeling-Echo) (voices) ·
 [Tonsor](https://github.com/CursedPrograms/Changeling-Tonsor) (hairstyles) ·
 realtime: [Tiresias](https://github.com/CursedPrograms/Changeling-Tiresias-Realtime) ·
 [Chronos](https://github.com/CursedPrograms/Changeling-Chronos-Realtime) ·
 [Natio](https://github.com/CursedPrograms/Changeling-Natio-Realtime) ·
-[Cosmetics](https://github.com/CursedPrograms/Changeling-Cosmetics-Realtime).*
+[Cosmeta](https://github.com/CursedPrograms/Changeling-Cosmeta-Realtime).*
 
 Age a face forwards or backwards in a photo: slide towards younger or older, or make a **timeline** of five
 ages at once. Named after Chronos, time itself. Every face above is an AI-generated person who doesn't exist;
