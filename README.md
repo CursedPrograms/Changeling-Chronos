@@ -85,8 +85,10 @@ Changeling's look: **Before** and **After** side by side, the controls on the ri
 3. **Pivotal tuning** ([PTI](https://github.com/danielroich/PTI)): briefly fine-tune the generator on the face so the result still looks like it (skipped at Fast).
 4. **Edit**: move the latent along a learned age direction ([source](https://github.com/a312863063/generators-with-stylegan2)).
 5. **Keep gender**: in this generator age and gender are tangled (an old woman aged further starts to look like
-   a man), though their two directions are nearly at right angles. So FairFace reads each result, and one that
-   has drifted is nudged back along the gender direction until it reads as the original again.
+   a man: heavier brows and jaw, as StyleGAN learned from FFHQ's older faces), though their two directions are
+   nearly at right angles. So every older result is pushed back along the gender direction as far as it was aged
+   (FairFace alone missed it: it reads an older woman with long hair as female even when her face has gone
+   masculine). Then FairFace reads the result, and one that has still drifted is nudged back further.
 
 Known limit: the youngest end can drift a face's ethnicity (age and ethnicity are tangled the same way); a
 keep for that is planned.

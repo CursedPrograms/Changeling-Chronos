@@ -78,6 +78,7 @@ class AgeShifter:
     SURE = 0.8                  # Auto trusts FairFace's reading only this sure
     KEEP_GENDER_STEP = 1.2      # how far each nudge back goes (the swap itself uses 5)
     KEEP_GENDER_TRIES = 6
+    AGE_GENDER_HOLD = 2.0       # the push back towards the kept gender, per unit of ageing (see age())
 
     def _p(self, image, gender):
         """FairFace's probability that `image` (an aligned face) is `gender`."""
@@ -178,6 +179,12 @@ class AgeShifter:
                 results = []
                 for a in (amounts if amounts is not None else [amount]):
                     w_edit = self.edit(w, a)
+                    if keep_gender and a > 0.05:
+                        # ageing drifts a face towards male (heavier brows and jaw, StyleGAN learned that from
+                        # FFHQ's older faces), and FairFace doesn't see it on a woman with long hair: so a
+                        # push back along the gender direction, as far as the face is aged, before the check
+                        sign = -1.0 if gender == 'female' else 1.0
+                        w_edit[:, EDIT_LAYERS] += sign * self.AGE_GENDER_HOLD * a * self.gender_direction
                     if keep_gender and abs(a) > 0.05:
                         w_edit = self._keep_gender(w_edit, gender, p_gender)
                     edited = to_image(self.generator(w_edit))
