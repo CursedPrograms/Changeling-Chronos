@@ -13,6 +13,8 @@
 
 **Website:** https://cursedprograms.github.io/Changeling-Chronos/
 
+**The name.** Chronos is time itself in Greek myth, the one later painted as Father Time with his hourglass and scythe (the Greeks often mixed him up with Kronos, the Titan who ate his children). Time only goes one way for the rest of us; here it goes both.
+
 ![Three faces, each from much younger through as they are to much older](assets/chronos_samples.jpg)
 
 *Part of the Changeling family, all together in [Changeling Studio](https://github.com/CursedPrograms/Changeling-Studio):
