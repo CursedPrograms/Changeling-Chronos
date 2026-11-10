@@ -10,6 +10,7 @@ import threading
 import time
 import tkinter as tk
 import webbrowser
+from gallery import remember, show as show_gallery
 from tkinter import filedialog
 
 import customtkinter as ctk
@@ -206,6 +207,7 @@ class Window:
         row.pack(fill="x", padx=14, pady=(10, 0))
         self.save_btn = ctk.CTkButton(row, text="Save  (Ctrl+S)", command=self.save, state="disabled")
         self.save_btn.pack(side="left", expand=True, fill="x", padx=(0, 4))
+        ctk.CTkButton(row, text="Gallery", width=80, command=self.gallery).pack(side="left", padx=(4, 4))
         self.face_btn = ctk.CTkButton(row, text="Close-up", width=90, command=self.show_closeup, state="disabled")
         self.face_btn.pack(side="left")
 
@@ -339,6 +341,10 @@ class Window:
         self.result, self.closeup = None, None
         self._run(work, "Reading the face")
 
+    def gallery(self):
+        """Everything made with the Changelings (saving still asks where; the gallery lists it too)."""
+        show_gallery(self.root, "Chronos")
+
     def save(self):
         if self.result is None:
             return
@@ -350,6 +356,7 @@ class Window:
                                             filetypes=[("PNG", "*.png"), ("JPEG", "*.jpg")])
         if path and write_rgb(path, self.result):
             self.status.configure(text=f"Saved {os.path.basename(path)}")
+            remember(path, "Chronos")
 
     def show_closeup(self):
         if self.closeup is None:
