@@ -1,15 +1,16 @@
 """Pretrained weight locations and first-run download.
 
-Changeling Tiresias uses the same e4e checkpoint and face detector, so before downloading a file this
-looks in its sibling folders first (../Changeling-Tiresias/pretrained, ../Gender-Swap/pretrained) and uses
-theirs: 1.3 GB isn't fetched twice.
+Changeling Tiresias and Natio use the same e4e checkpoint, face detector and directions, so before downloading a
+file this looks in their folders (../Changeling-Tiresias/pretrained, ../Changeling-Natio/pretrained) and in
+F:\AIModels (face, stylegan2/directions) first and uses theirs: nothing is fetched twice.
 """
 import sys
 import urllib.request
 from pathlib import Path
 
 WEIGHTS_DIR = Path(__file__).resolve().parent.parent / 'pretrained'
-SIBLINGS = [WEIGHTS_DIR.parent.parent / name / 'pretrained' for name in ('Changeling-Tiresias', 'Gender-Swap')]
+SIBLINGS = [WEIGHTS_DIR.parent.parent / name / 'pretrained' for name in ('Changeling-Tiresias', 'Changeling-Natio')]
+SIBLINGS += [Path(r'F:\AIModels\face'), Path(r'F:\AIModels\stylegan2\directions')]
 
 FILES = {
     # e4e encoder + StyleGAN2 FFHQ 1024 generator in one checkpoint (Tov et al., 2021).
@@ -29,6 +30,18 @@ FILES = {
     'gender_cls': ('fairface_gender_int8.onnx',
                    'https://huggingface.co/onnx-community/fairface_gender_image_detection-ONNX/'
                    'resolve/main/onnx/model_int8.onnx'),
+    # The three regional directions Natio moves along (race_black / race_white / race_yellow are their authors'
+    # names): getting younger also drifts a face along them (towards East Asian), so Chronos steers back.
+    'race_black': ('race_black.npy', 'https://raw.githubusercontent.com/a312863063/generators-with-stylegan2/'
+                   'master/latent_directions/race_black.npy'),
+    'race_white': ('race_white.npy', 'https://raw.githubusercontent.com/a312863063/generators-with-stylegan2/'
+                   'master/latent_directions/race_white.npy'),
+    'race_yellow': ('race_yellow.npy', 'https://raw.githubusercontent.com/a312863063/generators-with-stylegan2/'
+                    'master/latent_directions/race_yellow.npy'),
+    # FairFace (Karkkainen & Joo 2021) ResNet-34, its 4-group model (White, Black, Asian, Indian) as ONNX: reads
+    # the face before and after, the way the gender one does.
+    'race_cls': ('fairface_race_res34.onnx',
+                 'https://huggingface.co/garavv/fairface-onnx/resolve/main/fairface.onnx'),
     # OpenCV YuNet face detector with 5-point landmarks.
     'yunet': ('face_detection_yunet_2023mar.onnx',
               'https://media.githubusercontent.com/media/opencv/opencv_zoo/main/'

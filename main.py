@@ -12,6 +12,7 @@ import cv2
 import numpy as np
 
 QUALITY_STEPS = {'fast': 0, 'balanced': 100, 'best': 250}
+KEEP_RACE = {'auto': 'auto', 'on': True, 'off': None}
 
 
 def read_rgb(path):
@@ -43,12 +44,14 @@ def run_cli(args):
         print(f'{src.name}:')
         if args.timeline:
             results = shifter.age(read_rgb(src), 0, steps, progress, amounts=TIMELINE, keep_hair=args.keep_hair,
-                                   keep_gender=None if args.keep_gender == 'off' else args.keep_gender)
+                                   keep_gender=None if args.keep_gender == 'off' else args.keep_gender,
+                                   keep_race=KEEP_RACE[args.keep_race])
             image, tag = timeline_strip(results), 'timeline'
         else:
             output = 'photo' if (args.whole_photo or args.keep_hair) else 'frame'
             result = shifter.age(read_rgb(src), args.age, steps, progress, keep_hair=args.keep_hair, output=output,
-                                 keep_gender=None if args.keep_gender == 'off' else args.keep_gender)
+                                 keep_gender=None if args.keep_gender == 'off' else args.keep_gender,
+                                 keep_race=KEEP_RACE[args.keep_race])
             image = result.image
             tag = ('older' if args.age >= 0 else 'younger') + f'_{abs(args.age) * 100:.0f}'
         if steps:
@@ -73,6 +76,9 @@ def main():
     parser.add_argument('--timeline', action='store_true', help='Five ages side by side instead of one.')
     parser.add_argument('--keep-gender', choices=['auto', 'female', 'male', 'off'], default='auto',
                         help='Hold the face\'s gender while ageing (auto: only when FairFace is sure).')
+    parser.add_argument('--keep-race', choices=list(KEEP_RACE), default='auto',
+                        help='Hold the face\'s ethnicity while ageing: younger faces drift towards East Asian '
+                             'without it (auto: only when FairFace is sure).')
     parser.add_argument('--whole-photo', action='store_true',
                         help='Paste the result back into the whole photo (default: just the aged face frame).')
     parser.add_argument('--keep-hair', action='store_true',

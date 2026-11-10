@@ -76,6 +76,7 @@ Changeling's look: **Before** and **After** side by side, the controls on the ri
 | `--age` | -1 (much younger) .. +1 (much older); default 0.5 |
 | `--timeline` | five ages side by side instead of one |
 | `--keep-gender auto\|female\|male\|off` | hold the face's gender while ageing (auto: only when FairFace is sure) |
+| `--keep-race auto\|on\|off` | hold the face's ethnicity while ageing (auto, the default: only when FairFace is sure) |
 | `--quality fast\|balanced\|best` | `fast` = encoder only; `balanced` / `best` learn the face first (100 / 250 steps) |
 | `--whole-photo`, `--keep-hair` | paste back into the whole photo (with `--keep-hair`, only the face) |
 | `-o` | the output file (one input only) |
@@ -92,8 +93,13 @@ Changeling's look: **Before** and **After** side by side, the controls on the ri
    (FairFace alone missed it: it reads an older woman with long hair as female even when her face has gone
    masculine). Then FairFace reads the result, and one that has still drifted is nudged back further.
 
-Known limit: the youngest end can drift a face's ethnicity (age and ethnicity are tangled the same way); a
-keep for that is planned.
+6. **Keep ethnicity**: getting younger drifted faces towards East Asian (a blonde woman became an East Asian
+   girl): the age direction leans along the regional directions Changeling Natio uses (about +0.27 towards East
+   Asian, -0.28 away from European). So the age step goes without that lean, and FairFace's 4-group model (White,
+   Black, Asian, Indian; ResNet-34, `fairface_race_res34.onnx`) reads the face before and after: one that has
+   still drifted is nudged back towards its own group and away from the new one. On six test faces at the
+   youngest end, FairFace's reading of the face's own group went from 0.00-0.03 to 0.98-1.00 (the East Asian
+   face, which never drifted, stays at 0.99). It's always on when FairFace is sure of the face (`--keep-race`).
 
 ## Licenses
 

@@ -6,7 +6,7 @@ import torch
 import torch.nn.functional as F
 
 from .align import FaceAligner, paste_back
-from .classify import GenderClassifier
+from .classify import GenderClassifier, RaceClassifier
 from .encoder import Encoder4Editing
 from .stylegan2 import Generator
 from . import weights
@@ -73,12 +73,27 @@ class AgeShifter:
         g = torch.from_numpy(np.load(paths['gender'])[0]).float().to(self.device)
         self.gender_direction = g / g.norm()
         self.classifier = GenderClassifier(paths['gender_cls'])
+        # Getting younger also drifts a face towards East Asian (the age direction leans along Natio's regional
+        # directions: about +0.27 towards East Asian and -0.28 away from European; FFHQ's children are a different
+        # crowd from its adults), so a blonde woman became an East Asian girl. Kept the same way as the gender: the
+        # age step goes without its share along the three regional directions, and FairFace's four groups read
+        # the face before and after; a drifted result is nudged back towards its group and away from the new one.
+        self.race_directions = {}
+        for group, key in (('white', 'race_white'), ('black', 'race_black'), ('asian', 'race_yellow')):
+            r = torch.from_numpy(np.load(paths[key])[0]).float().to(self.device)
+            self.race_directions[group] = r / r.norm()
+        basis = torch.linalg.qr(torch.stack(list(self.race_directions.values()), 1))[0]   # 512 x 3, orthonormal
+        kept = self.direction - basis @ (basis.T @ self.direction)
+        self.direction_keep_race = kept / kept.norm()
+        self.race_classifier = RaceClassifier(paths['race_cls'])
         self._lpips = None
 
     SURE = 0.8                  # Auto trusts FairFace's reading only this sure
     KEEP_GENDER_STEP = 1.2      # how far each nudge back goes (the swap itself uses 5)
     KEEP_GENDER_TRIES = 6
     AGE_GENDER_HOLD = 3.0       # the push back towards the kept gender, per unit of ageing (see age())
+    KEEP_RACE_STEP = 1.0        # each nudge back towards the face's own group (Natio's whole change is about 2)
+    KEEP_RACE_TRIES = 6
 
     def _p(self, image, gender):
         """FairFace's probability that `image` (an aligned face) is `gender`."""
@@ -99,6 +114,28 @@ class AgeShifter:
             w_edit[:, EDIT_LAYERS] += sign * self.KEEP_GENDER_STEP * self.gender_direction
         return w_edit
 
+    @torch.no_grad()
+    def _keep_race(self, w_edit, group, p_before):
+        """Nudge an aged latent back until FairFace is about as sure of the face's group (white, black, asian,
+        indian) as it was for the photo: towards the group's own direction (Indian has none) and away from the
+        group the face drifted to."""
+        own = RaceClassifier.GROUPS.index(group)
+        want = min(0.95, p_before) - 0.05
+        for _ in range(self.KEEP_RACE_TRIES):
+            p = self.race_classifier(to_image(self.generator(w_edit)))
+            if p[own] >= want:
+                break
+            p[own] = -1
+            drifted = RaceClassifier.GROUPS[int(p.argmax())]
+            step = torch.zeros_like(self.direction)
+            if group in self.race_directions:
+                step += self.race_directions[group]
+            if drifted in self.race_directions:
+                step -= self.race_directions[drifted]
+            w_edit = w_edit.clone()
+            w_edit[:, EDIT_LAYERS] += self.KEEP_RACE_STEP * step
+        return w_edit
+
     SIGN = -1.0
 
     @torch.no_grad()
@@ -106,10 +143,12 @@ class AgeShifter:
         w = self.encoder(to_tensor(aligned, 256, 'cpu'))
         return w.to(self.device) + self.latent_avg
 
-    def edit(self, w, amount):
-        """amount -1 (much younger) .. +1 (much older)."""
+    def edit(self, w, amount, keep_race=False):
+        """amount -1 (much younger) .. +1 (much older). keep_race: the age step without its share along the
+        regional directions."""
         w = w.clone()
-        w[:, EDIT_LAYERS] += self.SIGN * amount * BASE_STEP * self.direction
+        direction = self.direction_keep_race if keep_race else self.direction
+        w[:, EDIT_LAYERS] += self.SIGN * amount * BASE_STEP * direction
         return w
 
     def tune(self, w, aligned, steps, lr=3e-4, progress=None):
@@ -151,13 +190,15 @@ class AgeShifter:
         return self.aligner.align(image, landmarks, 1024)
 
     def age(self, image, amount, tune_steps=0, progress=None, amounts=None, keep_hair=False, output='frame',
-            keep_gender='auto'):
+            keep_gender='auto', keep_race='auto'):
         """Age the largest face in `image` (RGB uint8) by `amount` (-1 much younger .. +1 much older).
         With `amounts` (a list), returns one result per amount from a single tuning (for a timeline).
         output: 'frame' (the default) makes .image the aged face frame itself; 'photo' pastes it back into the
         whole photo (with keep_hair, only the face: the photo keeps its own hair).
         keep_gender: 'female' or 'male' keeps that gender as the face ages; 'auto' reads it with FairFace and
-        keeps it only when FairFace is sure (80 %+; it often isn't for old faces); None doesn't."""
+        keeps it only when FairFace is sure (80 %+; it often isn't for old faces); None doesn't.
+        keep_race: True holds the face's FairFace group (white, black, asian, indian) as it ages; 'auto' only when
+        FairFace is sure of it (80 %+); None doesn't."""
         aligned, matrix = self._align(image)
         w = self.invert(aligned)
         gender, p_gender = self.classifier(aligned)
@@ -167,6 +208,12 @@ class AgeShifter:
         elif keep_gender == 'auto' and p_gender < self.SURE:
             keep_gender = None
         self.last_gender = (gender, p_gender, keep_gender)
+        race_p = self.race_classifier(aligned)
+        group, p_group = RaceClassifier.GROUPS[int(race_p.argmax())], float(race_p.max())
+        if keep_race == 'auto':
+            keep_race = p_group >= self.SURE
+        keep_race = bool(keep_race)
+        self.last_race = (group, p_group, keep_race)
 
         pretrained = None
         if tune_steps > 0:
@@ -178,7 +225,7 @@ class AgeShifter:
                 recon = to_image(self.generator(w))
                 results = []
                 for a in (amounts if amounts is not None else [amount]):
-                    w_edit = self.edit(w, a)
+                    w_edit = self.edit(w, a, keep_race)
                     if keep_gender and a > 0.05:
                         # ageing drifts a face towards male (heavier brows and jaw, StyleGAN learned that from
                         # FFHQ's older faces), and FairFace doesn't see it on a woman with long hair: so a
@@ -187,6 +234,8 @@ class AgeShifter:
                         w_edit[:, EDIT_LAYERS] += sign * self.AGE_GENDER_HOLD * a * self.gender_direction
                     if keep_gender and abs(a) > 0.05:
                         w_edit = self._keep_gender(w_edit, gender, p_gender)
+                    if keep_race and abs(a) > 0.05:
+                        w_edit = self._keep_race(w_edit, group, p_group)
                     edited = to_image(self.generator(w_edit))
                     results.append(AgeResult(image=edited if output == 'frame' else paste_back(image, edited, matrix, face_only=keep_hair), aligned=aligned,
                                              reconstruction=recon, edited=edited, amount=a))
